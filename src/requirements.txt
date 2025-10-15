@@ -1,0 +1,2 @@
+scikit-learn==1.7.1
+google-adk==1.16.0
