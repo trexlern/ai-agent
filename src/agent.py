@@ -1,5 +1,4 @@
 import asyncio
-from google.adk import Agent
 from google.adk.runners import InMemoryRunner
 from google.adk.sessions import Session
 from google.genai import types
@@ -11,6 +10,7 @@ import sys
 sys.path.append(".")
 from callback_logging import log_query_to_model, log_model_response
 import google.cloud.logging
+from app_agent.agent import root_agent
 
 # 1. Load environment variables from the agent directory's .env file
 load_dotenv()
@@ -29,16 +29,6 @@ async def main():
     # 2. Set or load other variables
     app_name = 'my_agent_app'
     user_id_1 = 'user1'
-
-    # 3. Define Your Agent
-    root_agent = Agent(
-        model=model_name,
-        name="trivia_agent",
-        instruction="Answer questions.",
-        before_model_callback=log_query_to_model,
-        after_model_callback=log_model_response,
-
-    )
 
     # 3. Create a Runner
     runner = InMemoryRunner(
@@ -67,12 +57,11 @@ async def main():
             if event.content.parts and event.content.parts[0].text:
                 print(f'** {event.author}: {event.content.parts[0].text}')
 
-        cloud_logging_client.close()
-
-
     # 6. Use this function on a new query
     query = "What is the capital of France?"
     await run_prompt(my_session, query)
+    
+    cloud_logging_client.close()
 
 if __name__ == "__main__":
     asyncio.run(main())
